@@ -1,4 +1,5 @@
 from pathlib import Path
+from datetime import timedelta
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -35,11 +36,13 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
+    "core.middlewares.access_token_middleware.AccessTokenMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    
 ]
 
 CORS_ALLOW_ALL_ORIGINS = True
@@ -58,16 +61,27 @@ REST_FRAMEWORK = {
     ],
 }
 
+# SIMPLE_JWT = {
+#     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=5),
+#     'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
+#     'AUTH_COOKIE': 'access_token',
+#     'AUTH_COOKIE_SECURE': False,
+#     'AUTH_COOKIE_SAMESITE': 'Lax',
+#     'AUTH_COOKIE_PATH': '/',
+#     'AUTH_COOKIE_DOMAIN': None,
+#     'AUTH_COOKIE_HTTPONLY': True,
+# }
+from datetime import timedelta
+
 SIMPLE_JWT = {
-    'AUTH_COOKIE': 'access_token',
-    'AUTH_COOKIE_SECURE': False,
-    'AUTH_COOKIE_SAMESITE': 'Lax',
-    'AUTH_COOKIE_PATH': '/',
-    'AUTH_COOKIE_DOMAIN': None,
-    'AUTH_COOKIE_HTTPONLY': True,
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=5),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
+    'ROTATE_REFRESH_TOKENS': True,
+    'BLACKLIST_AFTER_ROTATION': True,
+    'ALGORITHM': 'HS256',
+    'SIGNING_KEY': SECRET_KEY,
+    'AUTH_HEADER_TYPES': ('Bearer',),
 }
-
-
 
 
 ROOT_URLCONF = "project_commissioning_django.urls"
@@ -126,7 +140,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = "en-us"
 
-TIME_ZONE = "GMT-3"
+TIME_ZONE = "GMT"
 
 USE_I18N = True
 
