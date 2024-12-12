@@ -1,8 +1,9 @@
 from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticated
-from permissions import IsAdminUser
+from core.permissions import IsAdminUser
 from .models import Project, Stakeholder, CommissioningReport, OccupancyCertificate
 from .serializers import ProjectSerializer, StakeholderSerializer, CommissioningReportSerializer, OccupancyCertificateSerializer
+from rest_framework_simplejwt.views import TokenObtainPairView
 
 
 class ProjectViewSet(viewsets.ModelViewSet):

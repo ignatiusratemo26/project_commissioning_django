@@ -10,4 +10,5 @@ router.register('certificates', OccupancyCertificateViewSet)
 
 urlpatterns = [
     path('', include(router.urls)),
+    
 ]
