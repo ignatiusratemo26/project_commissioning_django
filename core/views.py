@@ -1,83 +1,115 @@
 from rest_framework import viewsets
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, IsAdminUser, AllowAny
 from core.permissions import IsAdminUser
 from .models import Project, Stakeholder, CommissioningReport, OccupancyCertificate, User
 from .serializers import ProjectSerializer, StakeholderSerializer, CommissioningReportSerializer, OccupancyCertificateSerializer, UserSerializer
-from rest_framework_simplejwt.views import TokenObtainPairView
-import jwt
 from django.conf import settings
-from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework_simplejwt.settings import api_settings
-from rest_framework_simplejwt.views import TokenObtainPairView
-from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.response import Response
-from rest_framework import status, permissions
+from rest_framework import status
 from rest_framework.decorators import action
+from django.contrib.auth import logout, login, authenticate
+from django.contrib.auth.views import LoginView, LogoutView
+from rest_framework.decorators import api_view
 import logging
-class CustomTokenObtainPairView(TokenObtainPairView):
-    def post(self, request, *args, **kwargs):
-        response = super().post(request, *args, **kwargs)
-        if response.status_code == 200:
-            refresh = RefreshToken(response.data['refresh'])
-            access_token = str(refresh.access_token)
+from django.views.decorators.csrf import csrf_exempt
+from rest_framework.views import APIView
+from django.middleware.csrf import get_token
+from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.views import TokenObtainPairView
+from rest_framework_simplejwt.authentication import JWTAuthentication
+from .serializers import MyTokenObtainPairSerializer, UserLoginSerializer, UserRegisterSerializer, PasswordSerializer
+from .validation import custom_validation
 
-            # Set the access token in a cookie
-            response.set_cookie(
-                key='access_token',
-                value=access_token,
-                httponly=True,
-                secure=False,  # Set to True in production
-                samesite='Lax'
-            )
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger(__name__)
 
-            # Optionally, set the refresh token in a cookie
-            response.set_cookie(
-                key='refresh_token',
-                value=str(refresh),
-                httponly=True,
-                secure=False,  # Set to True in production
-                samesite='Lax'
-            )
-        return response
 
-    
-class UserViewSet(viewsets.ViewSet):
-    queryset = User.objects.all()
+class UserViewSet(viewsets.ModelViewSet):
+
     serializer_class = UserSerializer
-    permission_classes = [permissions.AllowAny]
-
-    def get_permissions(self):
-        if self.action == 'register':
-            logging.debug("Register action: AllowAny permissions applied")
-            return [permissions.AllowAny()]
-        logging.debug("Other action: IsAuthenticated permissions applied")
-        return [permissions.IsAuthenticated()]
-
+    permission_classes=[IsAuthenticated]
+    authentication_classes = [JWTAuthentication]
 
     def get_queryset(self):
-        return self.queryset.filter(id=self.request.user.id)
-    def list(self, request):
-        return Response({'message': 'This is a list of users'})
-
-    @action(detail=True, methods=['post'], permission_classes=[permissions.AllowAny] )
-    def register(self, request):
-        serializer   = UserSerializer(data=request.data)
+        # Return only the currently authenticated user's details
+        return User.objects.filter(id=self.request.user.id)
+    
+    def list(self, request, *args, **kwargs):
+        """
+        Override the list method to return only the current user's data without pagination.
+        """
+        queryset = self.get_queryset()
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
+    
+    @action(detail=True, methods=['post', 'put'])
+    def set_password(self, request, *args, **kwargs):
+        user = self.request.user
+        serializer = PasswordSerializer(data=request.data)
         if serializer.is_valid():
-            user = serializer.save()
-            return Response(UserSerializer(user).data, status=status.HTTP_201_CREATED)
+            user.set_password(serializer.validated_data['password'])
+            user.save()
+            return Response({'status': 'password set'})
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class UserRegister(APIView):
+    permission_classes = (AllowAny,)
+    def post(self, request):
+        clean_data = custom_validation(request.data)
+        serializer = UserRegisterSerializer(data=clean_data)
+        if serializer.is_valid(raise_exception=True):
+            user = serializer.create(clean_data)
+            if user:
+                refresh = RefreshToken.for_user(user)
+                return Response({
+                    'refresh': str(refresh),
+                    'access': str(refresh.access_token),
+                    **serializer.data
+                }, status=status.HTTP_201_CREATED)
+            return Response(status=status.HTTP_400_BAD_REQUEST)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+class MyTokenObtainPairView(TokenObtainPairView):
+    serializer_class = MyTokenObtainPairSerializer
+    throttle_scope = 'login'
+      
+class UserLogin(APIView):
+    permission_classes = (AllowAny,)
 
-    def retrieve(self, request, pk=None):
-        return Response({'message': 'This is a retrieve method'})
+    def post(self, request):
+        serializer = UserLoginSerializer(data=request.data)
+        if serializer.is_valid():
+            user = serializer.validated_data['user']
 
-    def update(self, request, pk=None):
-        return Response({'message': 'This is an update method'})
+            # Generate JWT tokens
+            refresh = RefreshToken.for_user(user)
+            return Response({
+                'refresh': str(refresh),
+                'access': str(refresh.access_token),
+            }, status=status.HTTP_200_OK)
+        else:
+            # Log errors for debugging
+            logger.debug(f"Login failed with errors: {serializer.errors}")
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    def partial_update(self, request, pk=None):
-        return Response({'message': 'This is a partial update method'})
+class UserLogout(APIView):
+    permission_classes = (IsAuthenticated,)
 
-    def destroy(self, request, pk=None):
-        return Response({'message': 'This is a destroy method'})
+    def post(self, request):
+        try:
+            # Extract the refresh token from the request
+            refresh_token = request.data.get('refresh_token')
+            if refresh_token:
+                # Create a RefreshToken object to blacklist it
+                token = RefreshToken(refresh_token)
+                token.blacklist()  # Optional: Requires `djangorestframework-simplejwt` blacklist feature
+
+            return Response({'message': 'Logged out successfully'}, status=status.HTTP_205_RESET_CONTENT)
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
 
 class ProjectViewSet(viewsets.ModelViewSet):
     queryset = Project.objects.all()
