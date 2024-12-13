@@ -13,7 +13,7 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
-AUTH_USER_MODEL = "core.User"
+AUTH_USER_MODEL = "users.User"
 
 LOGIN_URL = "/api/login/"
 
@@ -34,6 +34,7 @@ INSTALLED_APPS = [
     "rest_framework_simplejwt",
     "django_filters",
     "core",
+    "users",
 ]
 
 MIDDLEWARE = [
@@ -49,7 +50,7 @@ MIDDLEWARE = [
 
 
 AUTHENTICATION_BACKENDS = [
-    'core.customauthbackend.EmailAuthBackend',
+    'users.customauthbackend.EmailAuthBackend',
     'django.contrib.auth.backends.ModelBackend',
 ]
 

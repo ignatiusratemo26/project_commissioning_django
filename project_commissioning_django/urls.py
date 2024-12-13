@@ -2,10 +2,16 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import path, include
+from rest_framework import routers
 
-urlpatterns = [
+router = routers.DefaultRouter()
+
+urlpatterns = router.urls
+
+urlpatterns += [
     path('admin/', admin.site.urls),
     path('api/', include('core.urls')),
+    path('api/', include('users.urls')),
 ]
 
 if settings.DEBUG:
