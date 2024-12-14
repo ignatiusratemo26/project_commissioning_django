@@ -3,13 +3,6 @@ from rest_framework.permissions import IsAuthenticated, IsAdminUser, AllowAny
 from users.permissions import IsAdminUser
 from .models import Project, Stakeholder, CommissioningReport, OccupancyCertificate, User
 from .serializers import ProjectSerializer, StakeholderSerializer, CommissioningReportSerializer, OccupancyCertificateSerializer
-from django.conf import settings
-from rest_framework_simplejwt.settings import api_settings
-from rest_framework.response import Response
-from rest_framework import status
-from rest_framework.decorators import action
-from django.contrib.auth import logout, login, authenticate
-from rest_framework.decorators import api_view
 import logging
 from rest_framework.views import APIView
 
@@ -20,7 +13,8 @@ logger = logging.getLogger(__name__)
 class ProjectViewSet(viewsets.ModelViewSet):
     queryset = Project.objects.all()
     serializer_class = ProjectSerializer
-    permission_classes = [IsAuthenticated, IsAdminUser]
+    # permission_classes = [IsAuthenticated, IsAdminUser]
+    permission_classes = [AllowAny]
 
     def get_permissions(self):
         if self.action == 'list':

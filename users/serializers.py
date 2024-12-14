@@ -14,24 +14,22 @@ logger = logging.getLogger(__name__)
 
 UserModel = get_user_model()
 
+
 class UserRegisterSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserModel
-        fields = ['email', 'password', 'username', 'first_name', 'last_name', 'phone_number', 'role']
+        fields = ['username', 'password', 'email', 'first_name', 'last_name']
+        extra_kwargs = {'password': {'write_only': True}}
 
     def create(self, validated_data):
-        # Create the user with validated data
         user = UserModel.objects.create_user(
-            email=validated_data['email'],
-            password=validated_data['password'],
             username=validated_data['username'],
+            password=validated_data['password'],
             first_name=validated_data.get('first_name', ''),
             last_name=validated_data.get('last_name', ''),
-            phone_number=validated_data.get('phone_number', ''),
-            role=validated_data.get('role', 'user')
         )
-        user.save()
         return user
+    
 
 
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
@@ -41,30 +39,30 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
         return token
     
 class UserLoginSerializer(serializers.Serializer):
-    email = serializers.EmailField(required=True)
+    username = serializers.CharField(required=True)
     password = serializers.CharField(write_only=True, required=True)
 
     def validate(self, data):
-        """
-        Validate user credentials.
-        """
-        email = data.get('email')
+        username = data.get('username')
         password = data.get('password')
 
-        # Attempt to authenticate
-        user = authenticate(email=email, password=password)
+        # Debug: Log the input
+        logger.debug(f"Attempting login for email: {username}")
+
+        # Authenticate using the custom backend
+        user = authenticate(username=username, password=password)
+
         if not user:
+            logger.error(f"Authentication failed for email: {username}")
             raise serializers.ValidationError("Invalid email or password.")
-        
-        # Attach user to validated_data for later use
+
         data['user'] = user
         return data
-
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserModel
-        fields = ['email','password', 'username' 'phone_number', 'first_name', 'last_name']
+        fields = ['username' ,'password', 'phone_number', 'first_name', 'last_name']
 
         
         

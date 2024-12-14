@@ -3,28 +3,16 @@ from django.contrib.auth import get_user_model
 
 UserModel = get_user_model()
 
-def custom_validation(data):
-    email= data['email'].strip()
-    password = data['password'].strip()
-    
-    if not email or UserModel.objects.filter(email=email).exists():
+def custom_validation(data): 
+    username = data.get('username', '').strip()
+    password = data.get('password', '').strip()
+
+    # Check if email exists
+    if not username or UserModel.objects.filter(username=username).exists():
         raise ValidationError('choose another email')
-    
+
+    # Check if password is valid
     if not password or len(password) < 8:
         raise ValidationError('choose another password, min 8 characters')
-    return data
 
-def validate_email(data):
-    email = data['email'].strip()
-    if not email:
-        raise ValidationError('an email is needed.')
-    
-def validate_password(data):
-    password = data['password'].strip()
-    if not password:
-        raise ValidationError('a password is needed.')
-    
-def validate_address(data):
-    address = data['address'].strip()
-    if not address:
-        raise ValidationError('a address is needed.')
+    return data
