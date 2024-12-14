@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 class UserViewSet(viewsets.ModelViewSet):
 
     serializer_class = UserSerializer
-    permission_classes=[IsAuthenticated]
+    permission_classes=[AllowAny]
     authentication_classes = [JWTAuthentication]
 
     def get_queryset(self):
@@ -38,6 +38,7 @@ class UserViewSet(viewsets.ModelViewSet):
         
     @action(detail=False, methods=['post'], permission_classes=[AllowAny])
     def register(self, request):
+        print(request.data)
         serializer = UserSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
