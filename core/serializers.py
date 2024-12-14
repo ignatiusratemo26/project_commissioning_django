@@ -1,11 +1,8 @@
 from rest_framework import serializers
-from .models import Project, Stakeholder, CommissioningReport, OccupancyCertificate, User
+from .models import Project, Stakeholder, CommissioningReport, OccupancyCertificate, Reports, ApprovedDrawings
 
 from rest_framework import serializers
-from django.contrib.auth import get_user_model, authenticate
-from django.core.exceptions import ValidationError
-from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
-from rest_framework_simplejwt.tokens import RefreshToken
+from django.contrib.auth import get_user_model
 import logging
 
 
@@ -21,11 +18,10 @@ class StakeholderSerializer(serializers.ModelSerializer):
 
 
 class ProjectSerializer(serializers.ModelSerializer):
-    stakeholders = StakeholderSerializer(many=True, read_only=True)
-
     class Meta:
         model = Project
-        fields = '__all__'
+        fields = ['id', 'name', 'location', 'scope', 'approved_docs', 'created_by']
+        read_only_fields = ['created_by']
 
 
 class CommissioningReportSerializer(serializers.ModelSerializer):
@@ -37,4 +33,14 @@ class CommissioningReportSerializer(serializers.ModelSerializer):
 class OccupancyCertificateSerializer(serializers.ModelSerializer):
     class Meta:
         model = OccupancyCertificate
+        fields = '__all__'
+
+class ApprovedDrawingsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ApprovedDrawings
+        fields = '__all__'
+
+class ReportsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Reports
         fields = '__all__'

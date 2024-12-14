@@ -3,15 +3,13 @@ from rest_framework.permissions import IsAuthenticated, IsAdminUser, AllowAny
 from .models import User
 from rest_framework.response import Response
 from rest_framework import status
-from rest_framework.decorators import action, api_view
+from rest_framework.decorators import action
 import logging
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework_simplejwt.authentication import JWTAuthentication
-from .serializers import MyTokenObtainPairSerializer, UserLoginSerializer, UserRegisterSerializer, PasswordSerializer, UserSerializer
-from .validation import custom_validation
-from django.core.exceptions import ValidationError
+from .serializers import PasswordSerializer, UserSerializer
 
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
@@ -20,7 +18,7 @@ logger = logging.getLogger(__name__)
 class UserViewSet(viewsets.ModelViewSet):
 
     serializer_class = UserSerializer
-    permission_classes=[AllowAny]
+    permission_classes=[IsAuthenticated]
     authentication_classes = [JWTAuthentication]
 
     def get_queryset(self):
@@ -28,9 +26,6 @@ class UserViewSet(viewsets.ModelViewSet):
         return User.objects.filter(id=self.request.user.id)
     
     def list(self, request, *args, **kwargs):
-        """
-        Override the list method to return only the current user's data without pagination.
-        """
         queryset = self.get_queryset()
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)

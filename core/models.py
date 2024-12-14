@@ -15,6 +15,31 @@ class Project(models.Model):
         return self.name
 
 
+class ApprovedDrawings(models.Model):
+    project = models.ForeignKey(Project, related_name='approved_drawings', on_delete=models.CASCADE)
+    architectural = models.FileField(upload_to='approved_drawings/architectural/')
+    structural = models.FileField(upload_to='approved_drawings/structural/')
+    proposed_sewer = models.FileField(upload_to='approved_drawings/sewer/')
+    proposed_water = models.FileField(upload_to='approved_drawings/water/')
+    proposed_electricity = models.FileField(upload_to='approved_drawings/electricity/')
+
+    def __str__(self):
+        return f"Approved Drawings for {self.project.name}"
+
+
+class Reports(models.Model):
+    project = models.ForeignKey(Project, related_name='reports_files', on_delete=models.CASCADE)
+    eia = models.FileField(upload_to='reports/eia/')
+    nema = models.FileField(upload_to='reports/nema/')
+    nca = models.FileField(upload_to='reports/nca/')
+    fire = models.FileField(upload_to='reports/fire/')
+    water = models.FileField(upload_to='reports/water/')
+    electricity = models.FileField(upload_to='reports/electricity/')
+
+    def __str__(self):
+        return f"Reports for {self.project.name}"
+
+
 class Stakeholder(models.Model):
     ROLE_CHOICES = [
         ('Architect', 'Architect'),
