@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 class UserViewSet(viewsets.ModelViewSet):
 
     serializer_class = UserSerializer
-    permission_classes=[IsAuthenticated]
+    permission_classes=[AllowAny]
     authentication_classes = [JWTAuthentication]
 
     def get_queryset(self):
@@ -41,7 +41,7 @@ class UserViewSet(viewsets.ModelViewSet):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
     
-    @action(detail=True, methods=['post', 'put'])
+    @action(detail=True, methods=['post', 'put'], permission_classes=[IsAuthenticated])
     def set_password(self, request, *args, **kwargs):
         user = self.request.user
         serializer = PasswordSerializer(data=request.data)
