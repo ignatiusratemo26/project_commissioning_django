@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Project, Stakeholder, CommissioningReport, OccupancyCertificate
+from .models import Project, Stakeholder, CommissioningReport, OccupancyCertificate, ApprovedDrawings
 
 @admin.register(Project)
 class ProjectAdmin(admin.ModelAdmin):
@@ -18,6 +18,13 @@ class CommissioningReportAdmin(admin.ModelAdmin):
     list_display = ('project', 'system', 'rating')
     search_fields = ('project__name', 'system')
     list_filter = ('system', 'rating')
+
+@admin.register(ApprovedDrawings)
+class ApprovedDrawingsAdmin(admin.ModelAdmin):
+    list_display = ('project', 'architectural', 'structural', 'proposed_sewer', 'proposed_water', 'proposed_electricity')
+    search_fields = ('project__name',)
+    list_filter = ('project',)
+
 
 @admin.register(OccupancyCertificate)
 class OccupancyCertificateAdmin(admin.ModelAdmin):
