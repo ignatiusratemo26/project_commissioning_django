@@ -15,9 +15,10 @@ ALLOWED_HOSTS = []
 
 AUTH_USER_MODEL = "users.User"
 
-LOGIN_URL = "/api/login/"
+LOGIN_URL = "/admin/login/"
 
-LOGOUT_URL = "/api/logout/"
+LOGOUT_REDIRECT_URL = '/admin/login/'
+
 
 LOGOUT_REDIRECT_URL = "/"
 

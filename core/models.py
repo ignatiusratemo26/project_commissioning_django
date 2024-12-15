@@ -10,6 +10,9 @@ class Project(models.Model):
     scope = models.CharField(max_length=50, choices=[('Residential', 'Residential'), ('Commercial', 'Commercial'), ('Mixed-use', 'Mixed-use')])
     approved_docs = models.JSONField(default=dict)  # {'architectural': '', 'structural': '', ...}
     created_by = models.ForeignKey(User, on_delete=models.CASCADE)
+    ready_for_approval = models.BooleanField(default=False)
+    approved_for_commissioning = models.BooleanField(default=False)
+    approved_for_occupancy = models.BooleanField(default=False)
 
     def __str__(self):
         return self.name
@@ -25,19 +28,6 @@ class ApprovedDrawings(models.Model):
 
     def __str__(self):
         return f"Approved Drawings for {self.project.name}"
-
-
-class Reports(models.Model):
-    project = models.ForeignKey(Project, related_name='reports_files', on_delete=models.CASCADE)
-    eia = models.FileField(upload_to='reports/eia/')
-    nema = models.FileField(upload_to='reports/nema/')
-    nca = models.FileField(upload_to='reports/nca/')
-    fire = models.FileField(upload_to='reports/fire/')
-    water = models.FileField(upload_to='reports/water/')
-    electricity = models.FileField(upload_to='reports/electricity/')
-
-    def __str__(self):
-        return f"Reports for {self.project.name}"
 
 
 class Stakeholder(models.Model):
@@ -58,6 +48,7 @@ class Stakeholder(models.Model):
 
 class CommissioningReport(models.Model):
     SYSTEM_CHOICES = [
+        ('Overall System', 'Overall System'),
         ('Fire System', 'Fire System'),
         ('Electrical System', 'Electrical System'),
         ('Water Supply System', 'Water Supply System'),

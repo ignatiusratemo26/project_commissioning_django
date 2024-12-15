@@ -1,11 +1,15 @@
 from django.contrib import admin
 from .models import Project, Stakeholder, CommissioningReport, OccupancyCertificate, ApprovedDrawings
 
+site_header = "NCA ProjCommission Admin"
+site_title = "NCA ProjCommission Admin Portal"
+index_title = "Welcome to the NCA ProjCommission Admin"
+
 @admin.register(Project)
 class ProjectAdmin(admin.ModelAdmin):
-    list_display = ('name', 'location', 'scope', 'created_by')
-    search_fields = ('name', 'location__county', 'location__constituency', 'created_by__email')
-    list_filter = ('scope', 'created_by')
+    list_display = ('name', 'location', 'scope', 'created_by', 'ready_for_approval', 'approved_for_commissioning', 'approved_for_occupancy')
+    search_fields = ('name', 'location__county', 'location__constituency', 'created_by__email', 'scope', 'ready_for_approval', 'approved_for_commissioning', 'approved_for_occupancy')
+    list_filter = ('scope', 'ready_for_approval', 'approved_for_commissioning', 'approved_for_occupancy')
 
 @admin.register(Stakeholder)
 class StakeholderAdmin(admin.ModelAdmin):
@@ -31,3 +35,8 @@ class OccupancyCertificateAdmin(admin.ModelAdmin):
     list_display = ('project', 'uploaded_by')
     search_fields = ('project__name', 'uploaded_by__email')
     list_filter = ('project', 'uploaded_by')
+
+    def save_model(self, request, obj, form, change):
+        if not obj.uploaded_by:  # Set only if not already set
+            obj.uploaded_by = request.user
+        super().save_model(request, obj, form, change)

@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Project, Stakeholder, CommissioningReport, OccupancyCertificate, Reports, ApprovedDrawings
+from .models import Project, Stakeholder, CommissioningReport, OccupancyCertificate, ApprovedDrawings
 
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
@@ -38,9 +38,4 @@ class OccupancyCertificateSerializer(serializers.ModelSerializer):
 class ApprovedDrawingsSerializer(serializers.ModelSerializer):
     class Meta:
         model = ApprovedDrawings
-        fields = '__all__'
-
-class ReportsSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Reports
         fields = '__all__'

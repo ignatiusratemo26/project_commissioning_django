@@ -9,7 +9,6 @@ from .models import (
     CommissioningReport,
     OccupancyCertificate,
     ApprovedDrawings,
-    Reports,
     User,
 )
 from .serializers import (
@@ -18,7 +17,6 @@ from .serializers import (
     CommissioningReportSerializer,
     OccupancyCertificateSerializer,
     ApprovedDrawingsSerializer,
-    ReportsSerializer,
 )
 import logging
 
@@ -62,16 +60,36 @@ class ProjectViewSet(viewsets.ModelViewSet):
         return Response({"message": "Project rejected successfully"}, status=status.HTTP_200_OK)
 
 
+
+
 class StakeholderViewSet(viewsets.ModelViewSet):
     queryset = Stakeholder.objects.all()
     serializer_class = StakeholderSerializer
-    permission_classes = [IsAuthenticated]
+
+    def get_permissions(self):
+        # Allow anyone to view the list of stakeholders
+        if self.action == 'list':
+            self.permission_classes = [AllowAny]
+        else:
+            self.permission_classes = [IsAuthenticated]
+        return super().get_permissions()
 
     def get_queryset(self):
-        if self.request.user.role == 'admin':
-            return Stakeholder.objects.all()
-        return Stakeholder.objects.filter(project__created_by=self.request.user)
+        """
+        Override to allow filtering stakeholders by project query parameter.
+        Example: /stakeholders/?project=<project_id>
+        """
+        project_id = self.request.query_params.get("project")
+        queryset = Stakeholder.objects.all()
 
+        if project_id:
+            queryset = queryset.filter(project_id=project_id)
+
+        # Admins can see everything; others are restricted
+        if self.request.user.is_authenticated and self.request.user.role != 'admin':
+            queryset = queryset.filter(project__created_by=self.request.user)
+
+        return queryset
 
 class ApprovedDrawingsViewSet(viewsets.ModelViewSet):
     queryset = ApprovedDrawings.objects.all()
@@ -83,16 +101,6 @@ class ApprovedDrawingsViewSet(viewsets.ModelViewSet):
             return ApprovedDrawings.objects.all()
         return ApprovedDrawings.objects.filter(project__created_by=self.request.user)
 
-
-class ReportsViewSet(viewsets.ModelViewSet):
-    queryset = Reports.objects.all()
-    serializer_class = ReportsSerializer
-    permission_classes = [IsAuthenticated]
-
-    def get_queryset(self):
-        if self.request.user.role == 'admin':
-            return Reports.objects.all()
-        return Reports.objects.filter(project__created_by=self.request.user)
 
 
 class CommissioningReportViewSet(viewsets.ModelViewSet):

@@ -4,7 +4,6 @@ from .views import (
     ProjectViewSet,
     StakeholderViewSet,
     ApprovedDrawingsViewSet,
-    ReportsViewSet,
     CommissioningReportViewSet,
     OccupancyCertificateViewSet,
 )
@@ -16,7 +15,6 @@ router = DefaultRouter()
 router.register(r'projects', ProjectViewSet, basename='project')
 router.register(r'stakeholders', StakeholderViewSet, basename='stakeholder')
 router.register(r'approved-drawings', ApprovedDrawingsViewSet, basename='approveddrawings')
-router.register(r'reports', ReportsViewSet, basename='reports')
 router.register(r'commissioning-reports', CommissioningReportViewSet, basename='commissioningreport')
 router.register(r'occupancy-certificates', OccupancyCertificateViewSet, basename='occupancycertificate')
 

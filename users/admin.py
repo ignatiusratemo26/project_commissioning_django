@@ -19,3 +19,14 @@ class CustomUserAdmin(UserAdmin):
     ordering = UserAdmin.ordering + ('role',)
 
 
+    def get_fieldsets(self, request, obj=None):
+        fieldsets = super().get_fieldsets(request, obj)
+        fieldsets = tuple(
+            (name, {'fields': [field for field in data['fields'] if field != 'email']})
+            for name, data in fieldsets
+        )
+        return fieldsets
+
+    def get_list_display(self, request):
+        list_display = super().get_list_display(request)
+        return tuple(field for field in list_display if field != 'email')
