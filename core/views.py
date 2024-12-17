@@ -97,10 +97,46 @@ class ApprovedDrawingsViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
+        """
+        Filter ApprovedDrawings based on user role.
+        """
         if self.request.user.role == 'admin':
             return ApprovedDrawings.objects.all()
         return ApprovedDrawings.objects.filter(project__created_by=self.request.user)
 
+    def perform_create(self, serializer):
+        """
+        Override to save the ApprovedDrawings and update the project's approved_docs field.
+        """
+        approved_drawings = serializer.save()  # Save the uploaded drawings instance
+        project = approved_drawings.project   # Get the associated project
+
+        # Update the project's approved_docs field with the file paths
+        project.approved_docs.update({
+            "architectural": approved_drawings.architectural.url if approved_drawings.architectural else '',
+            "structural": approved_drawings.structural.url if approved_drawings.structural else '',
+            "proposed_sewer": approved_drawings.proposed_sewer.url if approved_drawings.proposed_sewer else '',
+            "proposed_water": approved_drawings.proposed_water.url if approved_drawings.proposed_water else '',
+            "proposed_electricity": approved_drawings.proposed_electricity.url if approved_drawings.proposed_electricity else '',
+        })
+        project.save()
+
+    def perform_update(self, serializer):
+        """
+        Handle updates to ApprovedDrawings and sync with the project's approved_docs.
+        """
+        approved_drawings = serializer.save()
+        project = approved_drawings.project
+
+        # Update the approved_docs field with the updated file paths
+        project.approved_docs.update({
+            "architectural": approved_drawings.architectural.url if approved_drawings.architectural else '',
+            "structural": approved_drawings.structural.url if approved_drawings.structural else '',
+            "proposed_sewer": approved_drawings.proposed_sewer.url if approved_drawings.proposed_sewer else '',
+            "proposed_water": approved_drawings.proposed_water.url if approved_drawings.proposed_water else '',
+            "proposed_electricity": approved_drawings.proposed_electricity.url if approved_drawings.proposed_electricity else '',
+        })
+        project.save()
 
 
 class CommissioningReportViewSet(viewsets.ModelViewSet):

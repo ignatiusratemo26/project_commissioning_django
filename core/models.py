@@ -1,8 +1,11 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from users.models import User
+from django.conf import settings
 
-
+def get_approved_doc_path(instance, filename):
+  # Use project ID and filename to construct a path within MEDIA_ROOT
+  return f'approved_documents/{instance.id}/{filename}'
 
 class Project(models.Model):
     name = models.CharField(max_length=255)
@@ -14,17 +17,24 @@ class Project(models.Model):
     approved_for_commissioning = models.BooleanField(default=False)
     approved_for_occupancy = models.BooleanField(default=False)
 
+    def get_approved_doc_urls(self):
+        urls = {}
+        for key, value in self.approved_docs.items():
+            if value:
+                urls[key] = f'{settings.MEDIA_URL}{value}'
+        return urls
+
     def __str__(self):
         return self.name
-
+ 
 
 class ApprovedDrawings(models.Model):
     project = models.ForeignKey(Project, related_name='approved_drawings', on_delete=models.CASCADE)
     architectural = models.FileField(upload_to='approved_drawings/architectural/')
-    structural = models.FileField(upload_to='approved_drawings/structural/')
-    proposed_sewer = models.FileField(upload_to='approved_drawings/sewer/')
-    proposed_water = models.FileField(upload_to='approved_drawings/water/')
-    proposed_electricity = models.FileField(upload_to='approved_drawings/electricity/')
+    structural = models.FileField(upload_to='approved_drawings/structural/', null=True, blank=True)
+    proposed_sewer = models.FileField(upload_to='approved_drawings/sewer/', null=True, blank=True)
+    proposed_water = models.FileField(upload_to='approved_drawings/water/', null=True, blank=True)
+    proposed_electricity = models.FileField(upload_to='approved_drawings/electricity/', null=True, blank=True)
 
     def __str__(self):
         return f"Approved Drawings for {self.project.name}"
