@@ -11,7 +11,11 @@ class Project(models.Model):
     name = models.CharField(max_length=255)
     location = models.JSONField()  # {'county': '...', 'constituency': '...', 'plot_number': '...'}
     scope = models.CharField(max_length=50, choices=[('Residential', 'Residential'), ('Commercial', 'Commercial'), ('Mixed-use', 'Mixed-use')])
-
+    ##############################
+    nema_cert = models.FileField(upload_to='nema_certificates/', null=True, blank=True)
+    eia_report = models.FileField(upload_to='eia_reports/', null=True, blank=True)
+    nca_cert = models.FileField(upload_to='nca_certificates/', null=True, blank=True)
+    ##########################################
     architectural = models.FileField(upload_to='approved_drawings/architectural/', null=True, blank=True)
     structural = models.FileField(upload_to='approved_drawings/structural/', null=True, blank=True)
     proposed_sewer = models.FileField(upload_to='approved_drawings/sewer/', null=True, blank=True)
@@ -23,11 +27,15 @@ class Project(models.Model):
     approved_for_commissioning = models.BooleanField(default=False)
     approved_for_occupancy = models.BooleanField(default=False)
 
-    approved_docs = models.IntegerField(default=0, editable=False)
+    # approved_docs = models.JSONField(default=dict, editable=False)
+    approved_docs= models.IntegerField(default=0, editable=False)
 
     def save(self, *args, **kwargs):
         # Count the number of uploaded files
         uploaded_files_count = sum([
+            1 if self.nema_cert else 0,
+            1 if self.eia_report else 0,
+            1 if self.nca_cert else 0,
             1 if self.architectural else 0,
             1 if self.structural else 0,
             1 if self.proposed_sewer else 0,

@@ -7,12 +7,7 @@ index_title = "Welcome to the NCA ProjCommission Admin"
 
 @admin.register(Project)
 class ProjectAdmin(admin.ModelAdmin):
-    list_display = (
-        'name', 'location', 'scope', 'created_by', 'ready_for_approval', 
-        'approved_for_commissioning', 'approved_for_occupancy',
-        'architectural', 'structural', 'proposed_sewer', 'proposed_water', 
-        'proposed_electricity'
-        )
+    list_display = ('name', 'location', 'scope', 'ready_for_approval', 'approved_for_commissioning', 'approved_for_occupancy', 'created_by', 'approved_docs','nema_cert', 'eia_report', 'nca_cert')
     search_fields = ('name', 'location__county', 'location__constituency', 'created_by__email', 'scope', 'ready_for_approval', 'approved_for_commissioning', 'approved_for_occupancy')
     list_filter = ('scope', 'ready_for_approval', 'approved_for_commissioning', 'approved_for_occupancy')
 
