@@ -10,6 +10,10 @@ class CommissioningReportInline(admin.TabularInline):
     model = CommissioningReport
     extra = 0  # Do not show extra empty rows
 
+class OccupancyCertificateInline(admin.TabularInline):
+    model = OccupancyCertificate
+    extra = 0  # Do not show extra empty rows
+
 def mark_ready_for_review(modeladmin, request, queryset):
     """Custom admin action to mark projects as ready for review."""
     for project in queryset:
@@ -19,6 +23,16 @@ def mark_ready_for_review(modeladmin, request, queryset):
             messages.success(request, f"{project.name} marked as ready for admin review.")
         else:
             messages.warning(request, f"{project.name} has no reports uploaded.")
+
+def mark_ready_for_occupancy(modeladmin, request, queryset):
+    """Custom admin action to mark projects as ready for occupancy."""
+    for project in queryset:
+        if project.approved_docs >= 5:  # Ensure all docs are uploaded
+            project.approved_for_occupancy = True
+            project.save()
+            messages.success(request, f"{project.name} marked as ready for occupancy.")
+        else:
+            messages.warning(request, f"{project.name} has missing documents.")
             
 mark_ready_for_review.short_description = "Mark selected projects as ready for admin review"
 
@@ -27,8 +41,9 @@ class ProjectAdmin(admin.ModelAdmin):
     list_display = ('name', 'location', 'scope', 'ready_for_approval', 'approved_for_commissioning','ready_for_admin_review' ,'approved_for_occupancy', 'created_by', 'approved_docs','nema_cert', 'eia_report', 'nca_cert')
     search_fields = ('name', 'location__county', 'location__constituency', 'created_by__email', 'scope', 'ready_for_approval', 'approved_for_commissioning', 'approved_for_occupancy')
     list_filter = ('scope', 'ready_for_approval', 'approved_for_commissioning', 'approved_for_occupancy')
-    actions = [mark_ready_for_review]
-    inlines = [CommissioningReportInline]
+    actions = [mark_ready_for_review, mark_ready_for_occupancy]
+    inlines = [CommissioningReportInline, OccupancyCertificateInline]
+
     
 
 @admin.register(Stakeholder)
