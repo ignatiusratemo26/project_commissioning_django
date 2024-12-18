@@ -9,7 +9,7 @@ from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework_simplejwt.authentication import JWTAuthentication
-from .serializers import PasswordSerializer, UserSerializer
+from .serializers import PasswordSerializer, UserSerializer, UserRegisterSerializer
 
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
@@ -33,13 +33,12 @@ class UserViewSet(viewsets.ModelViewSet):
         
     @action(detail=False, methods=['post'], permission_classes=[AllowAny])
     def register(self, request):
-        print(request.data)
-        serializer = UserSerializer(data=request.data)
+        serializer = UserRegisterSerializer(data=request.data)
         if serializer.is_valid():
-            serializer.save()
+            serializer.save()  # This uses the `create` method in `UserRegisterSerializer`, which hashes the password
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    
+
     
     @action(detail=True, methods=['post', 'put'], permission_classes=[IsAuthenticated])
     def set_password(self, request, *args, **kwargs):

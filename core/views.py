@@ -27,10 +27,11 @@ logger = logging.getLogger(__name__)
 class ProjectViewSet(viewsets.ModelViewSet):
     queryset = Project.objects.all()
     serializer_class = ProjectSerializer
+    permission_classes = [IsAuthenticated]
 
     def get_permissions(self):
         if self.action in ['list', 'approve', 'reject']:
-            self.permission_classes = [IsAdminUser]
+            self.permission_classes = [IsAuthenticated]
         else:
             self.permission_classes = [IsAuthenticated]
         return super().get_permissions()

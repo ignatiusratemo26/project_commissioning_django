@@ -11,18 +11,31 @@ class Project(models.Model):
     name = models.CharField(max_length=255)
     location = models.JSONField()  # {'county': '...', 'constituency': '...', 'plot_number': '...'}
     scope = models.CharField(max_length=50, choices=[('Residential', 'Residential'), ('Commercial', 'Commercial'), ('Mixed-use', 'Mixed-use')])
-    approved_docs = models.JSONField(default=dict)  # {'architectural': '', 'structural': '', ...}
+
+    architectural = models.FileField(upload_to='approved_drawings/architectural/', null=True, blank=True)
+    structural = models.FileField(upload_to='approved_drawings/structural/', null=True, blank=True)
+    proposed_sewer = models.FileField(upload_to='approved_drawings/sewer/', null=True, blank=True)
+    proposed_water = models.FileField(upload_to='approved_drawings/water/', null=True, blank=True)
+    proposed_electricity = models.FileField(upload_to='approved_drawings/electricity/', null=True, blank=True)
+
     created_by = models.ForeignKey(User, on_delete=models.CASCADE)
     ready_for_approval = models.BooleanField(default=False)
     approved_for_commissioning = models.BooleanField(default=False)
     approved_for_occupancy = models.BooleanField(default=False)
 
-    def get_approved_doc_urls(self):
-        urls = {}
-        for key, value in self.approved_docs.items():
-            if value:
-                urls[key] = f'{settings.MEDIA_URL}{value}'
-        return urls
+    approved_docs = models.IntegerField(default=0, editable=False)
+
+    def save(self, *args, **kwargs):
+        # Count the number of uploaded files
+        uploaded_files_count = sum([
+            1 if self.architectural else 0,
+            1 if self.structural else 0,
+            1 if self.proposed_sewer else 0,
+            1 if self.proposed_water else 0,
+            1 if self.proposed_electricity else 0,
+        ])
+        self.approved_docs = uploaded_files_count
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return self.name
