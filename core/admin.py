@@ -1,15 +1,35 @@
 from django.contrib import admin
 from .models import Project, Stakeholder, CommissioningReport, OccupancyCertificate, ApprovedDrawings
+from django.contrib import messages
 
 site_header = "NCA ProjCommission Admin"
 site_title = "NCA ProjCommission Admin Portal"
 index_title = "Welcome to the NCA ProjCommission Admin"
 
+class CommissioningReportInline(admin.TabularInline):
+    model = CommissioningReport
+    extra = 0  # Do not show extra empty rows
+
+def mark_ready_for_review(modeladmin, request, queryset):
+    """Custom admin action to mark projects as ready for review."""
+    for project in queryset:
+        if project.reports.count() > 0:  # Ensure reports are uploaded
+            project.ready_for_admin_review = True
+            project.save()
+            messages.success(request, f"{project.name} marked as ready for admin review.")
+        else:
+            messages.warning(request, f"{project.name} has no reports uploaded.")
+            
+mark_ready_for_review.short_description = "Mark selected projects as ready for admin review"
+
 @admin.register(Project)
 class ProjectAdmin(admin.ModelAdmin):
-    list_display = ('name', 'location', 'scope', 'ready_for_approval', 'approved_for_commissioning', 'approved_for_occupancy', 'created_by', 'approved_docs','nema_cert', 'eia_report', 'nca_cert')
+    list_display = ('name', 'location', 'scope', 'ready_for_approval', 'approved_for_commissioning','ready_for_admin_review' ,'approved_for_occupancy', 'created_by', 'approved_docs','nema_cert', 'eia_report', 'nca_cert')
     search_fields = ('name', 'location__county', 'location__constituency', 'created_by__email', 'scope', 'ready_for_approval', 'approved_for_commissioning', 'approved_for_occupancy')
     list_filter = ('scope', 'ready_for_approval', 'approved_for_commissioning', 'approved_for_occupancy')
+    actions = [mark_ready_for_review]
+    inlines = [CommissioningReportInline]
+    
 
 @admin.register(Stakeholder)
 class StakeholderAdmin(admin.ModelAdmin):

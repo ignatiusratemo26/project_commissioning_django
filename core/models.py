@@ -25,6 +25,8 @@ class Project(models.Model):
     created_by = models.ForeignKey(User, on_delete=models.CASCADE)
     ready_for_approval = models.BooleanField(default=False)
     approved_for_commissioning = models.BooleanField(default=False)
+    ready_for_commissioning = models.BooleanField(default=False)
+    ready_for_admin_review = models.BooleanField(default=False)
     approved_for_occupancy = models.BooleanField(default=False)
 
     # approved_docs = models.JSONField(default=dict, editable=False)
