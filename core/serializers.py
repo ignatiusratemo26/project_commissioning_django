@@ -20,7 +20,7 @@ class StakeholderSerializer(serializers.ModelSerializer):
 class ProjectSerializer(serializers.ModelSerializer):
     class Meta:
         model = Project
-        fields = ['id', 'name', 'location', 'scope', 'approved_docs', 'created_by']
+        fields = '__all__'
         read_only_fields = ['created_by']
 
 

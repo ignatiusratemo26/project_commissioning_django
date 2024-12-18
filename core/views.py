@@ -8,8 +8,7 @@ from .models import (
     Stakeholder,
     CommissioningReport,
     OccupancyCertificate,
-    ApprovedDrawings,
-    User,
+    ApprovedDrawings
 )
 from .serializers import (
     ProjectSerializer,
