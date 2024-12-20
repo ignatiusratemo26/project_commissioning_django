@@ -26,7 +26,7 @@ class ProjectSerializer(serializers.ModelSerializer):
 class NotificationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Notification
-        fields = ['id', 'user', 'project', 'message', 'is_read', 'created_at']
+        fields = ['id', 'user', 'project', 'message', 'is_read', 'timestamp']
 
 class CommissioningReportSerializer(serializers.ModelSerializer):
     class Meta:

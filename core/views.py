@@ -31,7 +31,7 @@ class NotificationViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         # Fetch notifications for the authenticated user
-        return Notification.objects.filter(user=self.request.user).order_by('-created_at')
+        return Notification.objects.filter(user=self.request.user).order_by('-timestamp')
 
     @action(detail=False, methods=['post'])
     def mark_all_as_read(self, request):
@@ -51,7 +51,7 @@ class NotificationViewSet(viewsets.ModelViewSet):
         except Notification.DoesNotExist:
             return Response({'error': 'Notification not found'}, status=404)
         
-        
+
 
 class ProjectViewSet(viewsets.ModelViewSet):
     queryset = Project.objects.all()
