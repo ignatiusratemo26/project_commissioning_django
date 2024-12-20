@@ -6,6 +6,7 @@ from .views import (
     ApprovedDrawingsViewSet,
     CommissioningReportViewSet,
     OccupancyCertificateViewSet,
+    NotificationViewSet,
 )
 
 # Initialize router for automatic URL routing
@@ -17,6 +18,7 @@ router.register(r'stakeholders', StakeholderViewSet, basename='stakeholder')
 router.register(r'approved-drawings', ApprovedDrawingsViewSet, basename='approveddrawings')
 router.register(r'commissioning-reports', CommissioningReportViewSet, basename='commissioningreport')
 router.register(r'occupancy-certificates', OccupancyCertificateViewSet, basename='occupancycertificate')
+router.register(r'notifications', NotificationViewSet, basename='notification')
 
 # Include all registered routes in the urlpatterns
 urlpatterns = [

@@ -8,7 +8,7 @@ from .models import (
     Stakeholder,
     CommissioningReport,
     OccupancyCertificate,
-    ApprovedDrawings
+    ApprovedDrawings, Notification
 )
 from .serializers import (
     ProjectSerializer,
@@ -16,12 +16,42 @@ from .serializers import (
     CommissioningReportSerializer,
     OccupancyCertificateSerializer,
     ApprovedDrawingsSerializer,
+    NotificationSerializer
 )
 import logging
 
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
+
+class NotificationViewSet(viewsets.ModelViewSet):
+    queryset = Notification.objects.all()
+    serializer_class = NotificationSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        # Fetch notifications for the authenticated user
+        return Notification.objects.filter(user=self.request.user).order_by('-created_at')
+
+    @action(detail=False, methods=['post'])
+    def mark_all_as_read(self, request):
+        # Mark all notifications as read
+        notifications = Notification.objects.filter(user=request.user, is_read=False)
+        notifications.update(is_read=True)
+        return Response({'status': 'All notifications marked as read'})
+
+    @action(detail=True, methods=['post'])
+    def mark_as_read(self, request, pk=None):
+        # Mark a single notification as read
+        try:
+            notification = Notification.objects.get(pk=pk, user=request.user)
+            notification.is_read = True
+            notification.save()
+            return Response({'status': 'Notification marked as read'})
+        except Notification.DoesNotExist:
+            return Response({'error': 'Notification not found'}, status=404)
+        
+        
 
 class ProjectViewSet(viewsets.ModelViewSet):
     queryset = Project.objects.all()

@@ -2,6 +2,19 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser
 from users.models import User
 from django.conf import settings
+from django.utils.timezone import now
+
+class Notification(models.Model):
+    user = models.ForeignKey(User, related_name='notifications', on_delete=models.CASCADE)
+    project = models.ForeignKey('Project', related_name='notifications', on_delete=models.CASCADE)
+    message = models.TextField()
+    timestamp = models.DateTimeField(default=now)
+    is_read = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f"Notification for {self.user.username} - {self.message}"
+    
+
 
 def get_approved_doc_path(instance, filename):
   # Use project ID and filename to construct a path within MEDIA_ROOT

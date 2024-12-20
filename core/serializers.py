@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Project, Stakeholder, CommissioningReport, OccupancyCertificate, ApprovedDrawings
+from .models import Project, Stakeholder, CommissioningReport, OccupancyCertificate, ApprovedDrawings, Notification
 
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
@@ -23,6 +23,10 @@ class ProjectSerializer(serializers.ModelSerializer):
         fields = '__all__'
         read_only_fields = ['created_by']
 
+class NotificationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Notification
+        fields = ['id', 'user', 'project', 'message', 'is_read', 'created_at']
 
 class CommissioningReportSerializer(serializers.ModelSerializer):
     class Meta:
