@@ -33,6 +33,9 @@ class Project(models.Model):
     approved_docs= models.IntegerField(default=0, editable=False)
 
     def save(self, *args, **kwargs):
+        if not isinstance(self.approved_docs, int):
+            self.approved_docs = 0
+            
         # Count the number of uploaded files
         uploaded_files_count = sum([
             1 if self.nema_cert else 0,

@@ -208,3 +208,21 @@ class OccupancyCertificateViewSet(viewsets.ModelViewSet):
 
         logger.info(f"Certificate issued for project {project.id} by admin {request.user.username}")
         return Response({"message": "Occupancy certificate issued successfully"}, status=status.HTTP_200_OK)
+    
+    @action(detail=False, methods=['get'], url_path='by-project')
+    def get_by_project(self, request):
+        """
+        Retrieve the occupancy certificate for a given project ID.
+        """
+        project_id = request.query_params.get('project_id')
+
+        if not project_id:
+            return Response({"error": "Project ID is required."}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            certificate = OccupancyCertificate.objects.get(project_id=project_id)
+            serializer = self.get_serializer(certificate)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except OccupancyCertificate.DoesNotExist:
+            return Response({"error": "Occupancy certificate not found for the given project."},
+                            status=status.HTTP_404_NOT_FOUND)
