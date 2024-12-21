@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Project, Stakeholder, CommissioningReport, OccupancyCertificate, ApprovedDrawings
+from .models import Project, Stakeholder, CommissioningReport, OccupancyCertificate, ApprovedDrawings, Notification
 from django.contrib import messages
 
 site_header = "NCA ProjCommission Admin"
@@ -44,7 +44,11 @@ class ProjectAdmin(admin.ModelAdmin):
     actions = [mark_ready_for_review, mark_ready_for_occupancy]
     inlines = [CommissioningReportInline, OccupancyCertificateInline]
 
-    
+@admin.register(Notification)
+class NotificationAdmin(admin.ModelAdmin):
+    list_display = ('user', 'project', 'message','timestamp', 'is_read')
+    search_fields = ('user', 'message')
+    list_filter = ('user', 'timestamp')
 
 @admin.register(Stakeholder)
 class StakeholderAdmin(admin.ModelAdmin):
