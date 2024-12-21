@@ -1,12 +1,13 @@
 from pathlib import Path
 from datetime import timedelta
-
+from decouple import config
+import os
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-u*ecx*ae3p2icpc3*wbyuvl9i#ip1*p8m#mp5q(^$&uwq9&l$n"
+SECRET_KEY = config("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -127,10 +128,20 @@ WSGI_APPLICATION = "project_commissioning_django.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
+# DATABASES = {
+#     "default": {
+#         "ENGINE": "django.db.backends.sqlite3",
+#         "NAME": BASE_DIR / "db.sqlite3",
+#     }
+# }
 DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': config('PGDATABASE'),
+        'USER': config('PGUSER'),
+        'PASSWORD': config('PGPASSWORD'),
+        'HOST': config('PGHOST'),
+        'PORT': config('PGPORT', default='5432'),
     }
 }
 

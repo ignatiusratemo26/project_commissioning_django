@@ -13,6 +13,6 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name="project",
             name="approved_docs",
-            field=models.JSONField(default=dict, editable=False),
+            field=models.IntegerField(default=dict, editable=False),
         ),
     ]

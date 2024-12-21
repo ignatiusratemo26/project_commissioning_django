@@ -14,6 +14,8 @@ class OccupancyCertificateInline(admin.TabularInline):
     model = OccupancyCertificate
     extra = 0  # Do not show extra empty rows
 
+
+
 def mark_ready_for_review(modeladmin, request, queryset):
     """Custom admin action to mark projects as ready for review."""
     for project in queryset:
@@ -40,9 +42,21 @@ mark_ready_for_review.short_description = "Mark selected projects as ready for a
 class ProjectAdmin(admin.ModelAdmin):
     list_display = ('name', 'location', 'scope', 'ready_for_approval', 'approved_for_commissioning','ready_for_admin_review' ,'approved_for_occupancy', 'created_by', 'approved_docs','nema_cert', 'eia_report', 'nca_cert')
     search_fields = ('name', 'location__county', 'location__constituency', 'created_by__email', 'scope', 'ready_for_approval', 'approved_for_commissioning', 'approved_for_occupancy')
-    list_filter = ('scope', 'ready_for_approval', 'approved_for_commissioning', 'approved_for_occupancy')
+    list_filter = ('ready_for_approval', 'approved_for_commissioning','ready_for_admin_review', 'approved_for_occupancy')
     actions = [mark_ready_for_review, mark_ready_for_occupancy]
     inlines = [CommissioningReportInline, OccupancyCertificateInline]
+
+    def get_readonly_fields(self, request, obj=None):
+        # If the user belongs to "Commissioning Team", make all fields read-only except `ready_for_admin_review`
+        if request.user.groups.filter(name="Commissioning Team").exists():
+            return [field.name for field in self.model._meta.fields if field.name != "ready_for_admin_review"]
+        return super().get_readonly_fields(request, obj)
+
+    def has_change_permission(self, request, obj=None):
+        # Restrict "Commissioning Team" to only toggle `ready_for_admin_review`
+        if request.user.groups.filter(name="Commissioning Team").exists():
+            return "can_toggle_ready_for_admin_review" in request.user.get_all_permissions()
+        return super().has_change_permission(request, obj)
 
 @admin.register(Notification)
 class NotificationAdmin(admin.ModelAdmin):

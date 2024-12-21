@@ -45,6 +45,11 @@ class Project(models.Model):
     # approved_docs = models.JSONField(default=dict, editable=False)
     approved_docs= models.IntegerField(default=0, editable=False)
 
+    class Meta:
+        permissions = [
+            ("can_toggle_ready_for_admin_review", "Can toggle ready for admin review"),
+        ]
+        
     def save(self, *args, **kwargs):
         if not isinstance(self.approved_docs, int):
             self.approved_docs = 0
@@ -81,12 +86,15 @@ class ApprovedDrawings(models.Model):
 
 class Stakeholder(models.Model):
     ROLE_CHOICES = [
+        ('Owner', 'Owner'),
         ('Architect', 'Architect'),
         ('Engineer', 'Engineer'),
         ('Contractor', 'Contractor'),
     ]
     name = models.CharField(max_length=255)
     role = models.CharField(max_length=50, choices=ROLE_CHOICES)
+    email = models.EmailField(max_length=255,null=True, blank=True)
+    phone_number = models.CharField(max_length=15, null=True, blank=True)
     practicing_number = models.CharField(max_length=255, unique=True)
     certificate = models.FileField(upload_to='certificates/')
     project = models.ForeignKey(Project, related_name='stakeholders', on_delete=models.CASCADE)
