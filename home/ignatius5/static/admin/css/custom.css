@@ -1,0 +1,12 @@
+/* custom.css */
+.module h2 {
+    color: purple;
+}
+
+#header {
+    background-color: #6a0dad; /* Purple.600 */
+}
+
+.header-title {
+    color: white; /* Optional, for contrast */
+}
